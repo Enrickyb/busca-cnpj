@@ -1,7 +1,23 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
-    <!-- Base application theme. -->
-    <style name="Base.Theme.BuscaCnpj" parent="Theme.Material3.DayNight.NoActionBar">
-        <!-- Customize your dark theme here. -->
-        <!-- <item name="colorPrimary">@color/my_dark_primary</item> -->
+    <style name="Base.Theme.BuscaCnpj.Dark" parent="Theme.Material3.DayNight.NoActionBar">
+        <!-- Paleta principal -->
+        <item name="colorPrimary">#66BB6A</item>
+        <item name="colorPrimaryVariant">#338A3E</item>
+        <item name="colorOnPrimary">#000000</item>
+
+        <item name="colorSecondary">#FFA726</item>
+        <item name="colorSecondaryVariant">#EF6C00</item>
+        <item name="colorOnSecondary">#000000</item>
+
+        <!-- Fundo e superfícies -->
+        <item name="colorSurface">#1E1E1E</item>
+        <item name="colorOnBackground">#E0E0E0</item>
+        <item name="colorOnSurface">#FFFFFF</item>
+
+        <!-- Cores de erro -->
+        <item name="colorError">#EF9A9A</item>
+        <item name="colorOnError">#000000</item>
     </style>
+
+    <style name="Theme.BuscaCnpj.Dark" parent="Base.Theme.BuscaCnpj.Dark" />
 </resources>

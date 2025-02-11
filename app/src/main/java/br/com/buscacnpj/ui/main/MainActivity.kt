@@ -1,22 +1,31 @@
 package br.com.buscacnpj.ui.main
 
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.view.View
+import android.widget.EditText
 import android.widget.ProgressBar
 import android.widget.TextView
+import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
-import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.viewpager2.widget.ViewPager2
 import br.com.buscacnpj.R
-import br.com.buscacnpj.adapters.SessionAdapter
+
+import br.com.buscacnpj.adapters.ViewPagerAdapter
 import br.com.buscacnpj.data.model.Cnae
 import br.com.buscacnpj.data.model.Partner
-import br.com.buscacnpj.data.model.SessionItem
+import br.com.buscacnpj.ui.fragments.BasicInfoFragment
+import br.com.buscacnpj.ui.fragments.CnaesFragment
+import br.com.buscacnpj.ui.fragments.PartnersFragment
+import br.com.buscacnpj.utils.addCnpjMask
 import br.com.buscacnpj.viewmodel.ApiViewModel
+import com.google.android.material.tabs.TabLayout
+import com.google.android.material.tabs.TabLayoutMediator
 
 class MainActivity : AppCompatActivity() {
 
@@ -32,25 +41,28 @@ class MainActivity : AppCompatActivity() {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
         }
-        val etBusinessCNPJ = findViewById<TextView>(R.id.etBusinessCNPJ)
+        val etBusinessCNPJ = findViewById<EditText>(R.id.etBusinessCNPJ)
         val btnSearch = findViewById<TextView>(R.id.btnSearch)
-        val recyclerView = findViewById<androidx.recyclerview.widget.RecyclerView>(R.id.recyclerView)
         val progressBar = findViewById<ProgressBar>(R.id.progressBar)
 
+        etBusinessCNPJ.addCnpjMask()
 
 
+        fun isValidCNPJ(cnpj: String): Boolean {
+            return cnpj.matches(Regex("\\d{2}\\.\\d{3}\\.\\d{3}/\\d{4}-\\d{2}"))
+        }
 
 
         btnSearch.setOnClickListener(){
-            val cnpj = etBusinessCNPJ.text.toString()
-            if (cnpj.isNotEmpty()) {
-                // Mostrar o ProgressBar e esconder a RecyclerView
-                progressBar.visibility = View.VISIBLE
-                recyclerView.visibility = View.GONE
 
-                // Iniciar chamada para buscar dados da API
+            val cnpj = etBusinessCNPJ.text.toString()
+            if (isValidCNPJ(cnpj)) {
+                progressBar.visibility = View.VISIBLE
                 apiViewModel.fetchData(cnpj)
+            } else {
+                Toast.makeText(this, "CNPJ inválido!", Toast.LENGTH_SHORT).show()
             }
+
         }
 
 
@@ -59,63 +71,15 @@ class MainActivity : AppCompatActivity() {
         apiViewModel.apiData.observe(this) { data ->
             progressBar.visibility = View.GONE
             data?.let {
-                Log.d("MainActivity", "Dados recebidos: ${it.nome_fantasia}, ${it.cnpj}") // Verifique os dados recebidos
-                recyclerView.visibility = View.VISIBLE
-                val sociosList = it.qsa?.map { partner ->
-                    Partner(partner.nome_socio.toString(), partner.qualificacao_socio.toString(), partner.faixa_etaria.toString())
-                }
-
-                Log.d("MainActivity", "Sócios: $sociosList.")
-                Log.d("MainActivity", "Quantidade de sócios: ${sociosList?.size}.")
-
-                val cnaesList = it.cnaes_secundarios?.map { cnae ->
-                    Cnae(cnae.codigo, cnae.descricao.toString())
-                }
-
-                fun convertDateToBrazilianDate(data: String): String {
-                    val year = data.substring(0, 4)
-                    val month = data.substring(5, 7)
-                    val day = data.substring(8, 10)
-                    return "$day/$month/$year"
-                }
-
-                val sessions = listOf(
-                    SessionItem("Informações Básicas", listOf(
-                        Pair("Nome Fantasia", data.nome_fantasia),
-                        Pair("CNPJ", data.cnpj),
-                        Pair("Razão Social", data.razao_social),
-                        Pair("Porte", data.descricao_porte),
-                        Pair("Data de Abertura", convertDateToBrazilianDate(data.data_inicio_atividade.toString())),
-                        Pair("Telefone", data.ddd_telefone_1),
-                        Pair("Email", data.email),
-                        Pair("Situação", data.situacao_especial),
-                        Pair("CEP", data.cep),
-                        Pair("UF", data.uf),
-                        Pair("Município", data.municipio),
-                        Pair("Bairro", data.bairro),
-                        Pair("Logradouro", data.logradouro),
-                        Pair("Número", data.numero),
-                        Pair("Complemento", data.complemento),
-                        Pair("Natureza Jurídica", data.natureza_juridica),
-                        Pair("Atividade Principal", data.cnae_fiscal.toString()),
-                        Pair("Capital Social", data.capital_social.toString()),
-                    ),
-                        isExpanded = true),
-                    SessionItem("Sócios", sociosList as List<Partner>),
-                    SessionItem("CNAEs Secundários", cnaesList as List<Cnae>)
-
-                )
-
-
-                val adapter = SessionAdapter(sessions as List<SessionItem>)
-                recyclerView.layoutManager = LinearLayoutManager(this) // Ou outro tipo de LayoutManager, como GridLayoutManager
-                recyclerView.isNestedScrollingEnabled = false
-                recyclerView.adapter = adapter
+                //mudar para a view DetailsActivity e enviar data como parâmetro
+                val intent = Intent(this, DetailsActivity::class.java)
+                intent.putExtra("data", it) // Passando o modelo Parcelable
+                startActivity(intent)
 
 
 
             }?: run {
-                Log.e("MainActivity", "Nenhum dado recebido ou erro na API.")
+                Toast.makeText(this, "Erro ao buscar dados. Tente novamente.", Toast.LENGTH_LONG).show()
             }
         }
 
@@ -123,4 +87,6 @@ class MainActivity : AppCompatActivity() {
 
 
     }
+
+
 }

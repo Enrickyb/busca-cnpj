@@ -1,5 +1,10 @@
 package br.com.buscacnpj.data.model
 
+import android.os.Parcelable
+import kotlinx.parcelize.Parcelize
+
+
+@Parcelize
 data class ApiResponse(
     val uf: String?,
     val cep: String?,
@@ -49,8 +54,9 @@ data class ApiResponse(
     val descricao_tipo_de_logradouro: String?,
     val descricao_motivo_situacao_cadastral: String?,
     val descricao_identificador_matriz_filial: String?
-)
+): Parcelable
 
+@Parcelize
 data class Socio(
     val pais: String?,
     val nome_socio: String?,
@@ -66,12 +72,13 @@ data class Socio(
     val codigo_qualificacao_socio: Int?,
     val qualificacao_representante_legal: String?,
     val codigo_qualificacao_representante_legal: Int?
-)
+): Parcelable
 
+@Parcelize
 data class CnaeSecundario(
     val codigo: Int,
     val descricao: String
-)
+): Parcelable
 /*
 *  Pair("Nome", data.nome_fantasia),
                         Pair("CNPJ", data.cnpj),
